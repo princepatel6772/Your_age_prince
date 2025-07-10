@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Age Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #dfe6e9;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #ecf0f1;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 300px;
+    }
+    .dob-input {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .dob-input input {
+      width: 60px;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+      text-align: center;
+      font-size: 16px;
+    }
+    .calculate-btn {
+      padding: 10px 20px;
+      background: #b2bec3;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      font-size: 16px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .result {
+      display: flex;
+      justify-content: space-around;
+    }
+    .circle {
+      background: #dcdde1;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: 16px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Age Calculator</h2>
+    <label>Enter Your Date of Birth:</label>
+    <div class="dob-input">
+      <input type="number" id="day" placeholder="DD" min="1" max="31">
+      <input type="number" id="month" placeholder="MM" min="1" max="12">
+      <input type="number" id="year" placeholder="YYYY" min="1900" max="2100">
+    </div>
+    <button class="calculate-btn" onclick="calculateAge()">Calculate Age</button>
+    <div class="result">
+      <div class="circle" id="years">0Y</div>
+      <div class="circle" id="months">0M</div>
+      <div class="circle" id="days">0D</div>
+    </div>
+  </div>
+  <script>
+    function calculateAge() {
+      let d = parseInt(document.getElementById('day').value);
+      let m = parseInt(document.getElementById('month').value);
+      let y = parseInt(document.getElementById('year').value);
+      if (!d || !m || !y) {
+        alert("Please enter a valid date of birth.");
+        return;
+      }
+
+      let today = new Date();
+      let birthDate = new Date(y, m - 1, d);
+
+      let ageY = today.getFullYear() - birthDate.getFullYear();
+      let ageM = today.getMonth() - birthDate.getMonth();
+      let ageD = today.getDate() - birthDate.getDate();
+
+      if (ageD < 0) {
+        ageM--;
+        ageD += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+      }
+      if (ageM < 0) {
+        ageY--;
+        ageM += 12;
+      }
+
+      document.getElementById('years').innerText = ageY + "Y";
+      document.getElementById('months').innerText = ageM + "M";
+      document.getElementById('days').innerText = ageD + "D";
+
+      // Save to MongoDB backend
+      let mobile = localStorage.getItem("userMobile");
+      let password = localStorage.getItem("userPassword");
+      fetch("http://localhost:3000/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mobile,
+          password,
+          dob: `${d}/${m}/${y}`,
+          age: { years: ageY, months: ageM, days: ageD }
+        })
+      });
+
+    }
+  </script>
+</body>
+</html>
